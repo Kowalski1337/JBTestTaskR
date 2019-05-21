@@ -43,16 +43,16 @@ Test task for jetbrains internship. Project title: Code Insight For R Language
 
 ### Оценка выполнения задания
 
-1. Калькулятор: На вход подается корректная программа без <if-expression>, у которой <function-definition-list> пустой.<br>
+1. Калькулятор: На вход подается корректная программа без *`<if-expression>`*, у которой *`<function-definition-list>`* пустой.<br>
 Пример:
 (2+2)<br>
 Ответ:4<br>
 Пример:(2+((3*4)/5))<br>
 Ответ:4<br>
-2. Поддержка <if-expression>: в программе присутствуют <if-expression><br>
+2. Поддержка *`<if-expression>`*: в программе присутствуют *`<if-expression>`*<br>
 Пример:[((10+20)>(20+10))]?{1}:{0}<br>
 Ответ:0<br>
-3. Поддержка функций: <function-definition-list> не пустой<br> 
+3. Поддержка функций: *`<function-definition-list>`* не пустой<br> 
 Пример:<br>
 g(x)={(f(x)+f((x/2)))}<br>
 f(x)={[(x>1)]?{(f((x-1))+f((x-2)))}:{x}}<br>
