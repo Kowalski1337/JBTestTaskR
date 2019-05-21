@@ -39,7 +39,20 @@ public class Parser {
     }
 
     private Expression parseExpression1() throws ParseException {
-        return parseExpression2();
+        Expression ans;
+        switch (lex.getCurToken()) {
+            case MINUS:
+            case NUMBER:
+            case LPAR1:
+            case LPAR2:
+                ans = parseExpression2();
+                break;
+            case NAME:
+            default:
+                throw new ParseException("SYNTAX ERROR");
+        }
+        checkExpression();
+        return ans;
     }
 
     private Expression parseExpression2() throws ParseException {
@@ -53,23 +66,57 @@ public class Parser {
                 ans = parseBinaryExpression();
                 break;
             case LPAR2:
+                ans = parseIfExpression();
+                break;
             default:
                 throw new ParseException("SYNTAX ERROR");
         }
-        if (lex.getCurToken() != Token.END &&
-                lex.getCurToken() != Token.RPAR2 &&
-                lex.getCurToken() != Token.RPAR3 &&
-                lex.getCurToken() != Token.COMMA &&
-                lex.getCurToken() != Token.RPAR1 &&
-                lex.getCurToken() != Token.PLUS &&
-                lex.getCurToken() != Token.MINUS &&
-                lex.getCurToken() != Token.AST &&
-                lex.getCurToken() != Token.DIV &&
-                lex.getCurToken() != Token.PER &&
-                lex.getCurToken() != Token.LT &&
-                lex.getCurToken() != Token.GT &&
-                lex.getCurToken() != Token.EQ
-        ) throw new ParseException("SYNTAX ERROR");
+        checkExpression();
+        return ans;
+    }
+
+    private Expression parseIfExpression() throws ParseException {
+        Expression ans;
+        switch (lex.getCurToken()){
+            case LPAR2:
+                lex.nextToken();
+                Expression iff = parseExpression1();
+                if (lex.getCurToken() != Token.RPAR2){
+                    throw new ParseException("SYNTAX ERROR");
+                }
+                lex.nextToken();
+                if (lex.getCurToken() != Token.QMARK){
+                    throw new ParseException("SYNTAX ERROR");
+                }
+                lex.nextToken();
+                if (lex.getCurToken() != Token.LPAR1){
+                    throw new ParseException("SYNTAX ERROR");
+                }
+                lex.nextToken();
+                Expression first = parseExpression1();
+                if (lex.getCurToken() != Token.RPAR1){
+                    throw new ParseException("SYNTAX ERROR");
+                }
+                lex.nextToken();
+                if (lex.getCurToken() != Token.ELSE){
+                    throw new ParseException("SYNTAX ERROR");
+                }
+                lex.nextToken();
+                if (lex.getCurToken() != Token.LPAR1){
+                    throw new ParseException("SYNTAX ERROR");
+                }
+                lex.nextToken();
+                Expression second = parseExpression1();
+                if (lex.getCurToken() != Token.RPAR1){
+                    throw new ParseException("SYNTAX ERROR");
+                }
+                lex.nextToken();
+                ans = new IF(iff, first, second);
+                break;
+                default:
+                    throw new ParseException("SYNTAX ERROR");
+        }
+        checkExpression();
         return ans;
     }
 
@@ -91,20 +138,7 @@ public class Parser {
                 default:
                     throw new ParseException("SYNTAX ERROR");
         }
-        if (lex.getCurToken() != Token.END &&
-                lex.getCurToken() != Token.RPAR2 &&
-                lex.getCurToken() != Token.RPAR3 &&
-                lex.getCurToken() != Token.COMMA &&
-                lex.getCurToken() != Token.RPAR1 &&
-                lex.getCurToken() != Token.PLUS &&
-                lex.getCurToken() != Token.MINUS &&
-                lex.getCurToken() != Token.AST &&
-                lex.getCurToken() != Token.DIV &&
-                lex.getCurToken() != Token.PER &&
-                lex.getCurToken() != Token.LT &&
-                lex.getCurToken() != Token.GT &&
-                lex.getCurToken() != Token.EQ
-        ) throw new ParseException("SYNTAX ERROR");
+        checkExpression();
         return ans;
     }
 
@@ -160,6 +194,11 @@ public class Parser {
                 throw new ParseException("SYNTAX ERROR");
 
         }
+        checkExpression();
+        return ans;
+    }
+
+    private void checkExpression() throws ParseException {
         if (lex.getCurToken() != Token.END &&
                 lex.getCurToken() != Token.RPAR2 &&
                 lex.getCurToken() != Token.RPAR3 &&
@@ -174,7 +213,6 @@ public class Parser {
                 lex.getCurToken() != Token.GT &&
                 lex.getCurToken() != Token.EQ
         ) throw new ParseException("SYNTAX ERROR");
-        return ans;
     }
 
 

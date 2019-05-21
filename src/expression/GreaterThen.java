@@ -14,6 +14,6 @@ public class GreaterThen extends BinaryOperation implements Expression {
 
     @Override
     void doGen(StringBuilder sb) {
-        sb.append("  > ");
+        sb.append(" > ");
     }
 }
