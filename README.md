@@ -111,33 +111,33 @@ g(10,0)<br>
 
 *`<character>`*  ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "_"<br>
 *`<digit>`*   ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"<br>
-*`<extra-number>`* ::= *`"" | <digit> <extra-number>`*<br>
-*`<number>`* ::= *`<digit> <extra-number>`*<br>
-*`<extra-identifier>`* ::= *`"" | <character> <extra-identifier>`*<br>
-*`<identifier>`* ::= *`<character> <extra-identifier>*`<br>
+*`<cont-number>`* ::= *`"" | <digit> <cont-number>`*<br>
+*`<number>`* ::= *`<digit> <cont-number>`*<br>
+*`<cont-identifier>`* ::= *`"" | <character> <cont-identifier>`*<br>
+*`<identifier>`* ::= *`<character> <cont-identifier>*`<br>
 *`<operation>`* ::= "+" | "-" | "*" | "/" | "%" | ">" | "<" | "="<br>
 
 *`<constant-expression>`* ::= *`"-" <number> | <number>`*<br>
 *`<binary-expression>`* ::= *`"(" <expression> <operation> <expression>  ")"`*<br>
-*`<extra-argument-list>`* ::= *`"" | "," <expression> <extra-argument-list> `*<br>
-*`<argument-list>`* ::= *`<expression> <extra-argument-list>`*<br>
+*`<cont-argument-list>`* ::= *`"" | "," <expression> <cont-argument-list> `*<br>
+*`<argument-list>`* ::= *`<expression> <cont-argument-list>`*<br>
 *`<call-expression>`* ::= *`"" | "(" <argument-list> ")"`*<br>
 *`<if-expression>`* ::= *`"[" <expression> "]?(" <expression> "):("<expression>")"`*<br>
 
 *`<expression'>`*::= *`<constant-expression> | <binary-expression> | <if-expression>`*<br>
 *`<expression>`* ::= *`<identifier> <call-expression> | <expression'>`*<br>
 
-*`<extra-parameter-list>`* ::= *`"" | "," <identifier> <extra-parameter-list>`*<br>
+*`<function-body>`* ::= *`"" | "={" <expression> "}"`*
 
-*`<parameter-list>`* ::= *`<identifier> <extra-parameter-list>`*<br>
+*`<other-args'>`* ::= *`")" <EOL> <program> | "," <args>`*<br>
+*`<other-args>`* ::= *`")" <function-body> <EOL> <program> | "," <args-or-params>`*<br>
+*`<call-or-other'>`* ::= *`"<other-args'> | "(" <argument-list> ")" <other-args'>`*<br>
+*`<call-or-other>`* ::= *`"<other-args> | "(" <argument-list> ")" <other-args'>`*<br>
 
-*`<function-definition>`* ::= *`"(" <parameter_list> ")" "={" <expression> "}"`*<br>
-
-*`<extra-function-definition-list>`* ::= *`"" | <identifier> <function-difinition-list>`* 
-
-*`<function-definition-list>`* ::= *`<function-definition> <EOL> <extra-function-definition-list>`*<br>
-
-*`<program>`* ::= *`<identifier>  <function-definition-list> <expression> | <expression'>`*<br>
+*`<args>`* ::= *`<identifier> <call-or-other'> | <expression'> <other-args'>`*<br>
+*`<args-or-params>`* ::= *`<identifier> <call-or-other> | <expression'> <other-args'>`*<br>
+*`<cont-program>`* ::= *`"" | "("<args-or-params>`*<br>
+*`<program>`* ::= *`<identifier>  <cont-program> | <expression'>`*<br>
 *`<EOL>`* - символ перевода строки --- *`\n`*, программа не содержит других пробельных символов(пробел, табуляция, и т.д.);
 
 ###Построение множеств FIRST и FOLLOW
@@ -145,22 +145,25 @@ g(10,0)<br>
 *`<identifier>`* ::= `[a-zA-Z_]+`<br>
 *`<number>`* ::= `[0-9]+`<br>
 
-Так же введем еще один терминал `OP`, которому будет соответсвовать все возможные операции
+Так же введем обозначение `OP`, которому будет соответсвовать все возможные операции
 
 Нетерминал | Описание | FIRST | FOLLOW
 ---|---|---|---
-*`<program>`* | Код программы | *`<identifier>`*,*`<number>`*, `-`, `[`, `(` | `$`
-*`<function-definition-list>`* | Список функций | `(` | *`<identifier>`*,*`<number>`*, `-`, `[`, `(`
-*`<extra-function-definition-list>`* | Продолжение списка функций | *`<identifier>`*, `eps` | *`<identifier>`*, *`<number>`*, `-`, `[`, `(` 
-*`<function-definition>`* | Функция | `(` | `EOL`
-*`<parameter-list>`* | Список параметров функции | *`<identifier>`* | `)`
-*`<extra-parameter-list>`* | Продолжние списка параметров функции | `eps`, `,` | `)`
-*`<expression>`* | Выражение | *`<identifier>`*,*`<number>`*, `-`, `[`, `(` | `$`, `}`, `]`, `,`, `OP`
-*`<expression'>`* | Выражение | *`<number>`*, `-`, `[`, `(` | `$`, `}`, `]`, `,`, `OP`
-*`<if-expression>`* | Условный оператор | `[` | `$`, `}`, `]`, `,`, `OP`
-*`<call-expression>`* | Вызов функции | `&`, `eps` | `$`, `}`, `]`, `,`, `OP`
+*`<program>`* | Программа | *`<identifier>`*,*`<number>`*, `-`, `[`, `(` | `$`
+*`<cont-program>`* | Продолженеи программы | `eps`, `(` | `$`
+*`<args-or-params>`* | Аргумент или параметр функции(в зависимости от того вызов функции или объявление) | *`<identifier>`*,*`<number>`*, `-`, `[`, `(` | `$`
+*`<args>`* | Аргумент функции | *`<identifier>`*,*`<number>`*, `-`, `[`, `(` | `$`
+*`<call-or-other>`* | Описание аргументов функции текущего аргумента | `)`, `,`, `)` | `$`
+*`<call-or-other'>`* | Описание аргументов функции текущего аргумента(случай когда уже не может быть описание функции) | `)`, `,`, `)` | `$`
+*`<other-args>`* | Следующие арументы или параметры функции(в зависимости от того вызов функции или объявление)  | `)`, `,` | `$`
+*`<other-args'>`* | Следующие аргументы функции | `)`, `,` | `$`
+*`<function-body>`* | Список параметров функции | `eps`, `=` | *`<EOL>`* 
+*`<expression>`* | Выражение | *`<identifier>`*,*`<number>`*, `-`, `[`, `(` | `$`, `}`, `]`, `,`, `OP`, `)`
+*`<expression'>`* | Выражение | *`<number>`*, `-`, `[`, `(` | `$`, `}`, `]`, `,`, `OP`, `)`
+*`<if-expression>`* | Условный оператор | `[` | `$`, `}`, `]`, `,`, `OP`, `)`
+*`<call-expression>`* | Вызов функции | `&`, `eps` | `$`, `}`, `]`, `,`, `OP`, `)`
 *`<argument-list>`* | Список аргументов передаваемых в функцию | *`<identifier>`*,*`<number>`*, `-`, `[`, `(` | `)`
-*`<extra-argument-list>`* | Продолжение списка аргументов передаваемых в функцию | `,`, `eps` | `)`
-*`<binary-expression>`* | Бинарная операция над двумя выражениями | `(` | `$`, `}`, `]`, `,`, `OP`
-*`<constant-expression>`* | Число | *`<number>`*, `-` | `$`, `}`, `]`, `,`, `OP`
+*`<cont-argument-list>`* | Продолжение списка аргументов передаваемых в функцию | `,`, `eps` | `)`
+*`<binary-expression>`* | Бинарная операция над двумя выражениями | `(` | `$`, `}`, `]`, `,`, `OP`, `)`
+*`<constant-expression>`* | Число | *`<number>`*, `-` | `$`, `}`, `]`, `,`, `OP`, `)`
 *`<operation>`* | Бинарная операция | `OP` | *`<identifier>`*,*`<number>`*, `-`, `[`, `(`
