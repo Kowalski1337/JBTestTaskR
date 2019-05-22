@@ -3,8 +3,8 @@ package expression;
 import exception.runTimeException.DivisionByZeroException;
 
 public class Mod extends BinaryOperation implements  Expression {
-    public Mod(Expression left, Expression right) {
-        super(left, right);
+    public Mod(Expression left, Expression right,int line) {
+        super(left, right, line);
     }
 
     @Override
@@ -12,7 +12,7 @@ public class Mod extends BinaryOperation implements  Expression {
         if (b == 0) {
             StringBuilder sb = new StringBuilder();
             generate(sb);
-            throw new DivisionByZeroException("RUNTIME ERROR ".concat(sb.toString()));
+            throw new DivisionByZeroException("RUNTIME ERROR ".concat(sb.toString()).concat(":").concat(Integer.toString(getLine())));
         }
         return a % b;
     }

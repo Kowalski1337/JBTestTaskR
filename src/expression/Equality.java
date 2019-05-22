@@ -1,14 +1,12 @@
 package expression;
 
-import exception.runTimeException.DivisionByZeroException;
-
 public class Equality extends BinaryOperation implements Expression{
-    public Equality(Expression left, Expression right) {
-        super(left, right);
+    public Equality(Expression left, Expression right, int line) {
+        super(left, right, line);
     }
 
     @Override
-    int doEval(int a, int b) throws DivisionByZeroException {
+    int doEval(int a, int b) {
         return a == b ? 1 : 0;
     }
 

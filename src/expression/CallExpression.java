@@ -1,5 +1,6 @@
 package expression;
 
+import exception.runTimeException.ArgumentNumberMismatchException;
 import exception.runTimeException.NoSuchFunctionException;
 import exception.runTimeException.RunTimeException;
 import expression.function.Function;
@@ -13,17 +14,22 @@ public class CallExpression implements Expression {
 
     private List<Expression> args;
     private String name;
+    private int line;
 
-    public CallExpression(List<Expression> args, String name) {
+    public CallExpression(List<Expression> args, String name, int line) {
         this.args = args;
         this.name = name;
+        this.line = line;
     }
 
 
     @Override
     public int evaluate(Map<String, Function> functions, Map<String, Integer> variables) throws RunTimeException {
         if (!functions.containsKey(name)){
-            throw new NoSuchFunctionException("FUNCTION NOT FOUND " + name);
+            throw new NoSuchFunctionException("FUNCTION NOT FOUND ".concat(name).concat(":").concat(Integer.toString(getLine())));
+        }
+        if (args.size() != functions.get(name).numberOFArgs()) {
+            throw new ArgumentNumberMismatchException("ARGUMENT NUMBER MISMATCH ".concat(name).concat(":").concat(Integer.toString(getLine())));
         }
 
         List<Integer> evalArgs = new ArrayList<>();
@@ -38,6 +44,11 @@ public class CallExpression implements Expression {
         sb.append(name);
         sb.append('(');
         sb.append(args.stream().map(Object::toString).collect(Collectors.joining(",")));
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

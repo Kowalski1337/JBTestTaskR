@@ -8,14 +8,17 @@ import java.util.Map;
 public class Variable implements Expression {
 
     private String name;
-    public Variable(String name){
+    private int line;
+
+    public Variable(String name, int line) {
         this.name = name;
+        this.line = line;
     }
 
     @Override
     public int evaluate(Map<String, Function> functions, Map<String, Integer> variables) throws NoSuchParameterException {
-        if (!variables.containsKey(name)){
-            throw new NoSuchParameterException("PARAMETER NOT FOUND" + name);
+        if (!variables.containsKey(name)) {
+            throw new NoSuchParameterException("PARAMETER NOT FOUND ".concat(name).concat(":").concat(Integer.toString(getLine())));
         }
         return variables.get(name);
     }
@@ -23,6 +26,11 @@ public class Variable implements Expression {
     @Override
     public void generate(StringBuilder sb) {
         sb.append(name);
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

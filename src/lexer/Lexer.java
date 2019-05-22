@@ -152,6 +152,7 @@ public class Lexer {
         return curToken;
     }
 
+    @SuppressWarnings("unused")
     public int getCurPos() {
         return curPos;
     }
@@ -160,6 +161,7 @@ public class Lexer {
         return number;
     }
 
+    @SuppressWarnings("unused")
     public String showToken() {
         switch (curToken) {
             case EQ:

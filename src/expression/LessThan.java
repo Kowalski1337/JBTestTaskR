@@ -1,8 +1,8 @@
 package expression;
 
 public class LessThan extends BinaryOperation implements Expression {
-    public LessThan(Expression left, Expression right) {
-        super(left, right);
+    public LessThan(Expression left, Expression right, int line) {
+        super(left, right, line);
     }
 
     @Override

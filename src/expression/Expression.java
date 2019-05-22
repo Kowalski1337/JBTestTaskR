@@ -8,4 +8,5 @@ import java.util.Map;
 public interface Expression {
     int evaluate(Map<String, Function> functions, Map<String, Integer> variables) throws RunTimeException;
     void generate(StringBuilder sb);
+    int getLine();
 }

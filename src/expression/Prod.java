@@ -1,8 +1,8 @@
 package expression;
 
 public class Prod extends BinaryOperation implements Expression {
-    public Prod(Expression left, Expression right) {
-        super(left, right);
+    public Prod(Expression left, Expression right,int line) {
+        super(left, right, line);
     }
 
     @Override

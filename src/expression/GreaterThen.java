@@ -1,8 +1,8 @@
 package expression;
 
 public class GreaterThen extends BinaryOperation implements Expression {
-    public GreaterThen(Expression left, Expression right) {
-        super(left, right);
+    public GreaterThen(Expression left, Expression right, int line) {
+        super(left, right, line);
     }
 
     @Override

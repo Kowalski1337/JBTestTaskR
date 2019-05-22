@@ -1,6 +1,5 @@
 package expression;
 
-import exception.runTimeException.DivisionByZeroException;
 import exception.runTimeException.RunTimeException;
 import expression.function.Function;
 
@@ -8,11 +7,13 @@ import java.util.Map;
 
 public class IfExpression implements Expression {
     private Expression iff, first, second;
+    private int line;
 
-    public IfExpression(Expression iff, Expression first, Expression second){
+    public IfExpression(Expression iff, Expression first, Expression second, int line){
         this.first = first;
         this.second = second;
         this.iff = iff;
+        this.line = line;
     }
 
 
@@ -30,6 +31,11 @@ public class IfExpression implements Expression {
         sb.append("):(");
         second.generate(sb);
         sb.append(")");
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

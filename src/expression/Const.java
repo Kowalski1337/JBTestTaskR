@@ -5,9 +5,11 @@ import java.util.Map;
 public class Const implements Expression {
 
     private int value;
+    private int line;
 
-    public Const(int value){
+    public Const(int value, int line){
         this.value = value;
+        this.line = line;
     }
 
 
@@ -19,6 +21,11 @@ public class Const implements Expression {
     @Override
     public void generate(StringBuilder sb) {
         sb.append(value);
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

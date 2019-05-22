@@ -9,10 +9,12 @@ import java.util.Map;
 public abstract class BinaryOperation implements Expression {
     private Expression left;
     private Expression right;
+    private int line;
 
-    BinaryOperation(Expression left, Expression right) {
+    BinaryOperation(Expression left, Expression right, int line) {
         this.left = left;
         this.right = right;
+        this.line = line;
     }
 
     abstract int doEval(int a, int b) throws DivisionByZeroException;
@@ -38,5 +40,10 @@ public abstract class BinaryOperation implements Expression {
         doGen(sb);
         right.generate(sb);
         sb.append(')');
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 }
