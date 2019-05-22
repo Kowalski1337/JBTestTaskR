@@ -21,9 +21,9 @@ public class IF implements Expression {
         sb.append("[");
         iff.generate(sb);
         sb.append("]?(");
-        iff.generate(sb);
+        first.generate(sb);
         sb.append("):(");
-        iff.generate(sb);
+        second.generate(sb);
         sb.append(")");
     }
 }
