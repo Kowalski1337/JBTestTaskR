@@ -1,41 +1,271 @@
 import exception.ParseException;
 import expression.*;
+import expression.function.Function;
+import javafx.util.Pair;
 import lexer.Lexer;
 import lexer.Token;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Parser {
     private Lexer lex;
 
-    public Parser(InputStream is) throws ParseException {
-        lex = new Lexer(is);
+    public Parser(BufferedReader br) throws ParseException {
+        lex = new Lexer(br);
     }
 
-    public Expression parse() throws ParseException {
+    public Pair<Map<String, Function>, Expression> parse() throws ParseException {
         lex.nextToken();
         return parseProgram();
     }
 
-    private Expression parseProgram() throws ParseException {
-        Expression ans;
-        switch (lex.getCurToken()){
+    private Pair<Map<String, Function>, Expression> parseProgram() throws ParseException {
+        Pair<Map<String, Function>, Expression> ans;
+        switch (lex.getCurToken()) {
             case NUMBER:
             case MINUS:
             case LPAR1:
             case LPAR2:
-                ans = parseExpression2();
+                ans = new Pair<>(new HashMap<>(), parseExpression2());
                 break;
             case NAME:
-                default:
-                    throw new ParseException("SYNTAX ERROR");
+                String name = lex.getName();
+                lex.nextToken();
+                ans = parseContProgram(name);
+                break;
+            default:
+                throw new ParseException("SYNTAX ERROR");
         }
 
-        if (lex.getCurToken() != Token.END){
+        if (lex.getCurToken() != Token.END) {
             throw new ParseException("SYNTAX ERROR");
         }
 
         return ans;
+    }
+
+    private Pair<Map<String, Function>, Expression> parseContProgram(String name) throws ParseException {
+        Pair<Map<String, Function>, Expression> ans;
+        switch (lex.getCurToken()) {
+            case LPAR1:
+                lex.nextToken();
+                ans = parseArgsOrParams(new ArrayList<>(), new ArrayList<>(), name);
+                break;
+            case END:
+                ans = new Pair<>(new HashMap<>(), new Variable(name));
+                break;
+            default:
+                throw new ParseException("SYNTAX ERROR");
+        }
+        if (lex.getCurToken() != Token.END) {
+            throw new ParseException("SYNTAX ERROR");
+        }
+        return ans;
+    }
+
+    private Pair<Map<String, Function>, Expression> parseArgsOrParams(List<String> params, List<Expression> args, String name) throws ParseException {
+        Pair<Map<String, Function>, Expression> ans;
+        switch (lex.getCurToken()) {
+            case NUMBER:
+            case LPAR1:
+            case LPAR2:
+            case MINUS:
+                Expression expression = parseExpression2();
+                args.add(expression);
+                parseOtherArgs2(args);
+                ans = new Pair<>(new HashMap<>(), new CallExpression(args, name));
+                break;
+            case NAME:
+                String name1 = lex.getName();
+                lex.nextToken();
+                ans = parseCallOrOther1(params, args, name, name1);
+                break;
+            default:
+                throw new ParseException("SYNTAX ERROR");
+        }
+        if (lex.getCurToken() != Token.END) {
+            throw new ParseException("SYNTAX ERROR");
+        }
+        return ans;
+    }
+
+    private Pair<Map<String, Function>, Expression> parseCallOrOther1(List<String> params, List<Expression> args, String name1, String name2) throws ParseException {
+        Pair<Map<String, Function>, Expression> ans;
+        switch (lex.getCurToken()) {
+            case RPAR1:
+            case COMMA:
+                params.add(name2);
+                args.add(new Variable(name2));
+                ans = parseOtherArgs1(params, args, name1);
+                break;
+            case LPAR1:
+                lex.nextToken();
+                args.add(new CallExpression(parseArgumentList(), name2));
+                parseOtherArgs2(args);
+                ans = new Pair<>(new HashMap<>(), new CallExpression(args, name1));
+                break;
+            default:
+                throw new ParseException("SYNTAX ERROR");
+        }
+        if (lex.getCurToken() != Token.END) {
+            throw new ParseException("SYNTAX ERROR");
+        }
+        return ans;
+    }
+
+    private Pair<Map<String, Function>, Expression> parseOtherArgs1(List<String> params, List<Expression> args, String name) throws ParseException {
+        Pair<Map<String, Function>, Expression> ans;
+        switch (lex.getCurToken()) {
+            case COMMA:
+                lex.nextToken();
+                ans = parseArgsOrParams(params, args, name);
+                break;
+            case RPAR1:
+                lex.nextToken();
+                ans = parseFunctionBody(params, args, name);
+                break;
+            default:
+                throw new ParseException("SYNTAX ERROR");
+        }
+        if (lex.getCurToken() != Token.END) {
+            throw new ParseException("SYNTAX ERROR");
+        }
+        return ans;
+    }
+
+    private Pair<Map<String, Function>, Expression> parseFunctionBody(List<String> params, List<Expression> args, String name) throws ParseException {
+        Pair<Map<String, Function>, Expression> ans;
+        switch (lex.getCurToken()) {
+            case EQ:
+                lex.nextToken();
+                if (lex.getCurToken() != Token.LPAR3) {
+                    throw new ParseException("SYNTAX ERROR");
+                }
+                lex.nextToken();
+                Expression expression = parseExpression1();
+                if (lex.getCurToken() != Token.RPAR3) {
+                    throw new ParseException("SYNTAX ERROR");
+                }
+                lex.nextToken();
+                if (lex.getCurToken() != Token.EOL) {
+                    throw new ParseException("SYNTAX ERROR");
+                }
+                lex.nextToken();
+                Pair<Map<String, Function>, Expression> program = parseProgram();
+                Map<String, Function> mp = program.getKey();
+                mp.put(name, new Function(name, params, expression));
+                ans = new Pair<>(mp, program.getValue());
+                break;
+
+            case END:
+                ans = new Pair<>(new HashMap<>(), new CallExpression(args, name));
+                break;
+            default:
+                throw new ParseException("SYNTAX ERROR");
+        }
+        if (lex.getCurToken() != Token.END) {
+            throw new ParseException("SYNTAX ERROR");
+        }
+        return ans;
+    }
+
+    private void parseOtherArgs2(List<Expression> args) throws ParseException {
+        switch (lex.getCurToken()) {
+            case COMMA:
+                lex.nextToken();
+                parseArgs(args);
+                break;
+            case RPAR1:
+                lex.nextToken();
+                break;
+            default:
+                throw new ParseException("SYNTAX ERROR");
+        }
+
+        if (lex.getCurToken() != Token.END) {
+            throw new ParseException("SYNTAX ERROR");
+        }
+    }
+
+    private void parseArgs(List<Expression> args) throws ParseException {
+        switch (lex.getCurToken()) {
+            case NUMBER:
+            case LPAR1:
+            case LPAR2:
+            case MINUS:
+                args.add(parseExpression2());
+                parseOtherArgs2(args);
+                break;
+            case NAME:
+                String name = lex.getName();
+                lex.nextToken();
+                parseCallOrOther2(args, name);
+                break;
+            default:
+                throw new ParseException("SYNTAX ERROR");
+        }
+        if (lex.getCurToken() != Token.END) {
+            throw new ParseException("SYNTAX ERROR");
+        }
+    }
+
+    private void parseCallOrOther2(List<Expression> args, String name) throws ParseException {
+        switch (lex.getCurToken()) {
+            case RPAR1:
+            case COMMA:
+                parseOtherArgs2(args);
+                break;
+            case LPAR1:
+                lex.nextToken();
+                args.add(new CallExpression(parseArgumentList(), name));
+                parseOtherArgs2(args);
+                break;
+            default:
+                throw new ParseException("SYNTAX ERROR");
+        }
+        if (lex.getCurToken() != Token.END) {
+            throw new ParseException("SYNTAX ERROR");
+        }
+    }
+
+    private List<Expression> parseArgumentList() throws ParseException {
+        List<Expression> ans = new ArrayList<>();
+        switch (lex.getCurToken()) {
+            case MINUS:
+            case NUMBER:
+            case LPAR1:
+            case LPAR2:
+            case NAME:
+                ans.add(parseExpression1());
+                parseContArgumentList(ans);
+                break;
+        }
+        if (lex.getCurToken() != Token.RPAR1) {
+            throw new ParseException("SYNTAX ERROR");
+        }
+        return ans;
+    }
+
+    private void parseContArgumentList(List<Expression> args) throws ParseException {
+        switch (lex.getCurToken()) {
+            case COMMA:
+                lex.nextToken();
+                args.add(parseExpression1());
+                parseContArgumentList(args);
+                break;
+            case RPAR1:
+                break;
+            default:
+                throw new ParseException("SYNTAX ERROR");
+        }
+        if (lex.getCurToken() != Token.RPAR1) {
+            throw new ParseException("SYNTAX ERROR");
+        }
     }
 
     private Expression parseExpression1() throws ParseException {
@@ -48,8 +278,45 @@ public class Parser {
                 ans = parseExpression2();
                 break;
             case NAME:
+                String name = lex.getName();
+                lex.nextToken();
+                ans = parseCallExpression(name);
+                break;
             default:
                 throw new ParseException("SYNTAX ERROR");
+        }
+        checkExpression();
+        return ans;
+    }
+
+    private Expression parseCallExpression(String name) throws ParseException {
+        Expression ans;
+        switch (lex.getCurToken()) {
+            case LPAR1:
+                lex.nextToken();
+                List<Expression> args = parseArgumentList();
+                if (lex.getCurToken() != Token.RPAR1) {
+                    throw new ParseException("SYNTAX ERROR");
+                }
+                lex.nextToken();
+                ans = new CallExpression(args, name);
+                break;
+            case RPAR3:
+            case RPAR2:
+            case RPAR1:
+            case COMMA:
+            case MINUS:
+            case PLUS:
+            case DIV:
+            case AST:
+            case LT:
+            case PER:
+            case GT:
+            case EQ:
+                ans = new Variable(name);
+                break;
+                default:
+                    throw new ParseException("SYNTAX ERROR");
         }
         checkExpression();
         return ans;
@@ -77,44 +344,44 @@ public class Parser {
 
     private Expression parseIfExpression() throws ParseException {
         Expression ans;
-        switch (lex.getCurToken()){
+        switch (lex.getCurToken()) {
             case LPAR2:
                 lex.nextToken();
                 Expression iff = parseExpression1();
-                if (lex.getCurToken() != Token.RPAR2){
+                if (lex.getCurToken() != Token.RPAR2) {
                     throw new ParseException("SYNTAX ERROR");
                 }
                 lex.nextToken();
-                if (lex.getCurToken() != Token.QMARK){
+                if (lex.getCurToken() != Token.QMARK) {
                     throw new ParseException("SYNTAX ERROR");
                 }
                 lex.nextToken();
-                if (lex.getCurToken() != Token.LPAR1){
+                if (lex.getCurToken() != Token.LPAR1) {
                     throw new ParseException("SYNTAX ERROR");
                 }
                 lex.nextToken();
                 Expression first = parseExpression1();
-                if (lex.getCurToken() != Token.RPAR1){
+                if (lex.getCurToken() != Token.RPAR1) {
                     throw new ParseException("SYNTAX ERROR");
                 }
                 lex.nextToken();
-                if (lex.getCurToken() != Token.ELSE){
+                if (lex.getCurToken() != Token.ELSE) {
                     throw new ParseException("SYNTAX ERROR");
                 }
                 lex.nextToken();
-                if (lex.getCurToken() != Token.LPAR1){
+                if (lex.getCurToken() != Token.LPAR1) {
                     throw new ParseException("SYNTAX ERROR");
                 }
                 lex.nextToken();
                 Expression second = parseExpression1();
-                if (lex.getCurToken() != Token.RPAR1){
+                if (lex.getCurToken() != Token.RPAR1) {
                     throw new ParseException("SYNTAX ERROR");
                 }
                 lex.nextToken();
-                ans = new IF(iff, first, second);
+                ans = new IfExpression(iff, first, second);
                 break;
-                default:
-                    throw new ParseException("SYNTAX ERROR");
+            default:
+                throw new ParseException("SYNTAX ERROR");
         }
         checkExpression();
         return ans;
@@ -122,10 +389,10 @@ public class Parser {
 
     private Expression parseConstantExpression() throws ParseException {
         Expression ans;
-        switch (lex.getCurToken()){
+        switch (lex.getCurToken()) {
             case MINUS:
                 lex.nextToken();
-                if (lex.getCurToken() != Token.NUMBER){
+                if (lex.getCurToken() != Token.NUMBER) {
                     throw new ParseException("SYNTAX ERROR");
                 }
                 ans = new Const(-lex.getNumber());
@@ -135,8 +402,8 @@ public class Parser {
                 ans = new Const(lex.getNumber());
                 lex.nextToken();
                 break;
-                default:
-                    throw new ParseException("SYNTAX ERROR");
+            default:
+                throw new ParseException("SYNTAX ERROR");
         }
         checkExpression();
         return ans;
@@ -181,11 +448,11 @@ public class Parser {
                         lex.nextToken();
                         ans = new Equality(expression, parseExpression1());
                         break;
-                        default:
-                            throw new ParseException("SYNTAX ERROR");
+                    default:
+                        throw new ParseException("SYNTAX ERROR");
                 }
 
-                if (lex.getCurToken() != Token.RPAR1){
+                if (lex.getCurToken() != Token.RPAR1) {
                     throw new ParseException("SYNTAX ERROR");
                 }
                 lex.nextToken();

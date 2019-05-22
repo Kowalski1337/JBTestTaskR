@@ -1,7 +1,5 @@
 package expression;
 
-import exception.DivisionByZeroException;
-
 public class GreaterThen extends BinaryOperation implements Expression {
     public GreaterThen(Expression left, Expression right) {
         super(left, right);

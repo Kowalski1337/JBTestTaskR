@@ -1,6 +1,6 @@
 package expression;
 
-import exception.DivisionByZeroException;
+import exception.runTimeException.DivisionByZeroException;
 
 public class Mod extends BinaryOperation implements  Expression {
     public Mod(Expression left, Expression right) {

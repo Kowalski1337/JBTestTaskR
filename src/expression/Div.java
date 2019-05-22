@@ -1,6 +1,6 @@
 package expression;
 
-import exception.DivisionByZeroException;
+import exception.runTimeException.DivisionByZeroException;
 
 public class Div extends BinaryOperation implements Expression {
     public Div(Expression left, Expression right) {

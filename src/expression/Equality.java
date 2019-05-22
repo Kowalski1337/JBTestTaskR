@@ -1,6 +1,6 @@
 package expression;
 
-import exception.DivisionByZeroException;
+import exception.runTimeException.DivisionByZeroException;
 
 public class Equality extends BinaryOperation implements Expression{
     public Equality(Expression left, Expression right) {

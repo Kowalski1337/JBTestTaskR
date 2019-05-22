@@ -2,27 +2,27 @@ package lexer;
 
 import exception.ParseException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class Lexer {
-    private InputStream is;
+    private BufferedReader br;
     private int curChar;
     private String name;
     private Token curToken;
     private int curPos;
     private int number;
 
-    public Lexer(InputStream is) throws ParseException {
+    public Lexer(BufferedReader br) throws ParseException {
         curPos = 0;
-        this.is = is;
+        this.br = br;
         nextChar();
     }
 
     private void nextChar() throws ParseException {
         curPos++;
         try {
-            curChar = is.read();
+            curChar = br.read();
         } catch (IOException e) {
             throw new ParseException("Problem was occurred while reading", curPos);
         }
@@ -37,9 +37,6 @@ public class Lexer {
     }
 
     public void nextToken() throws ParseException {
-        while (Character.isWhitespace(curChar)) {
-            nextChar();
-        }
         if (isLetter(curChar)) {
             StringBuilder sb = new StringBuilder();
             sb.append((char) curChar);
