@@ -123,10 +123,10 @@ g(10,0)<br>
 *`<expression'>`*::= *`<constant-expression> | <binary-expression> | <if-expression>`*<br>
 *`<expression>`* ::= *`<identifier> <call-expression> | <expression'>`*<br>
 
-*`<function-body>`* ::= *`"" | "={" <expression> "}"`*
+*`<function-body>`* ::= *`"" | "={" <expression> "}" <EOL> <program> `*
 
 *`<other-args'>`* ::= *`")" | "," <args>`*<br>
-*`<other-args>`* ::= *`")" <function-body> <EOL> <program> | "," <args-or-params>`*<br>
+*`<other-args>`* ::= *`")" <function-body>  | "," <args-or-params>`*<br>
 *`<call-or-other'>`* ::= *`"<other-args'> | "(" <argument-list> ")" <other-args'>`*<br>
 *`<call-or-other>`* ::= *`"<other-args> | "(" <argument-list> ")" <other-args'>`*<br>
 
@@ -153,7 +153,7 @@ g(10,0)<br>
 *`<call-or-other'>`* | Описание аргументов функции текущего аргумента(случай когда уже не может быть описание функции) | `)`, `,`, `(` | `$`
 *`<other-args>`* | Следующие арументы или параметры функции(в зависимости от того вызов функции или объявление)  | `)`, `,` | `$`
 *`<other-args'>`* | Следующие аргументы функции | `)`, `,` | `$`
-*`<function-body>`* | Список параметров функции | `eps`, `=` | *`<EOL>`* 
+*`<function-body>`* | Список параметров функции | `eps`, `=` | `$` 
 *`<expression>`* | Выражение | *`<identifier>`*,*`<number>`*, `-`, `[`, `(` | `$`, `}`, `]`, `,`, `OP`, `)`
 *`<expression'>`* | Выражение | *`<number>`*, `-`, `[`, `(` | `$`, `}`, `]`, `,`, `OP`, `)`
 *`<if-expression>`* | Условный оператор | `[` | `$`, `}`, `]`, `,`, `OP`, `)`
